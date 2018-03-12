@@ -1,7 +1,16 @@
 /*
  * Create a list that holds all of your cards
  */
+const cards =["fa fa-diamond", "fa fa-paper-plane-o", "fa fa-anchor", "fa fa-bolt",
+             "fa fa-cube", "fa fa-leaf", "fa fa-bicycle", "fa fa-bomb",
+             "fa fa-diamond", "fa fa-paper-plane-o", "fa fa-anchor", "fa fa-bolt",
+             "fa fa-cube", "fa fa-leaf", "fa fa-bicycle", "fa fa-bomb"];
 
+let newCard = [];
+let tempCard = [];
+let openCards = [];
+
+let counter;
 
 /*
  * Display the cards on the page
@@ -9,6 +18,17 @@
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
+ function createshuffleCardsOnHtml(){
+    newCard = shuffle(cards.slice());
+    tempCard = newCard.slice();
+    let content;
+    $(".card").each(function( index, value ) {
+        content = '<i class="' + newCard.pop() + '"></i>';
+        $(this).empty();
+        $(this).attr('class', 'card');
+        $(this).append(content);
+    });
+ }
 
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
@@ -36,3 +56,183 @@ function shuffle(array) {
  *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
+ $('.card').on("click", function(e){
+    // showModal();
+    const clickedCard = $(e.currentTarget).attr('class');
+    console.log(clickedCard);
+    if (clickedCard !== 'card match' && clickedCard !== 'card open show' ) {
+        displayCardSymbol(e);
+        addToOpenCardList(e);
+        checkCard(e);
+        incrementStep();
+    }
+ });
+
+ // refersh the card
+ $('.restart').on("click", function(){
+    restart();
+ });
+
+ /*
+ * Function to restart
+ */
+ function restart(){
+    newCard = [];
+    tempCard = [];
+    openCards = [];
+    createshuffleCardsOnHtml();
+    $('.moves').text("0");
+    counter = parseInt($('.moves').text());
+    resetStart();
+ }
+
+/*
+ * Function to show a card
+ */
+ function displayCardSymbol(e){
+    $(e.currentTarget).attr('class', 'card open show');
+ }
+
+ /*
+ * Function to hide a card
+ */
+ function hideCardSymbol(e){
+    $(e.currentTarget).attr('class', 'card');
+ }
+
+ /*
+ * Function to match a card
+ */
+ function matchCardSymbol(e){
+    $(e.currentTarget).attr('class', 'card match');
+ }
+
+ /*
+  * Function to add new card to open cards
+  */
+ function addToOpenCardList(e){
+    openCards.push(e);
+ }
+
+ /*
+  * Function to remove card to open cards
+  */
+ function removeFromnewCardList(stringCard){
+    const index = tempCard.indexOf(stringCard);
+    if (index > -1) {
+        tempCard.splice(index, 1);
+    }
+ }
+
+ /*
+  * Function to check if all card match
+  */
+ function checkFinish(){
+    if(tempCard.length === 0){
+        showModal();
+    }
+ }
+
+ /*
+  * Function to show modal
+  */
+ function showModal(){
+    const starts = $('.stars').children().length;
+    const modal = $('#myModal');
+    // When the user clicks anywhere outside of the modal, close it
+    modal.on('click', function() {
+        $(this).css('display', 'none');
+    });
+
+    const span = $('.close').first();
+    // When the user clicks on <span> (x), close the modal
+    span.on('click', function() {
+        $(this).css('display', 'none');
+    });
+
+    const buttonPlayAgain = $('.button-play-again');
+    buttonPlayAgain.on('click', function(){
+        modal.css('display', 'none');
+        restart();
+    });
+
+    modal.css('display', 'block');
+    const message = 'with ' + counter + ' moves and' + stars + 'Start.';
+    $('.modal-text').text(message);
+ }
+
+ /*
+  * Function to check are there cards match?
+  */
+ function checkCard(e){
+    if (openCards.length > 1 && openCards.length % 2 === 0) {
+        const openCard = openCards[openCards.length-2];
+        const currentCard = e;
+        console.log("openCard : ", openCard);
+        console.log("currentCard : ", currentCard);
+
+        const openCardClass = $(openCard.currentTarget.children).attr('class');
+        const currentCardClass = $(currentCard.currentTarget.children).attr('class');
+        console.log("openCardClass : ", openCardClass);
+        console.log("currentCardClass : ", currentCardClass);
+
+        setTimeout(checkCardMatch, 500, openCard, currentCard, openCardClass, currentCardClass);
+    }
+ }
+
+
+ /*
+  * Function to check are two cards match?
+  */
+ function checkCardMatch(openCardEvent, currentCardEvent, openCardClass, currentCardClass){
+    console.log("calling checkCardMatch");
+    console.log("openCardEvent : ", openCardEvent);
+    console.log("currentCardEvent : ", currentCardEvent);
+    console.log("openCardClass : ", openCardClass);
+    console.log("currentCardClass : ", currentCardClass);
+    if (openCardClass === currentCardClass) {
+        console.log("sama");
+        matchCardSymbol(currentCardEvent);
+        matchCardSymbol(openCardEvent);
+        removeFromnewCardList(currentCardClass);
+        removeFromnewCardList(openCardClass);
+        setTimeout(checkFinish(), 500);
+    } else {
+        console.log("beda");
+        hideCardSymbol(currentCardEvent);
+        hideCardSymbol(openCardEvent);
+        openCards.pop();
+        openCards.pop();
+    }
+ }
+
+ /*
+  * Function to incremen steps?
+  */
+ function incrementStep(){
+    counter = parseInt($('.moves').text());
+    counter++;
+    $('.moves').text(counter);
+    console.log($('.moves').text());
+    decrementStart();
+ }
+
+  /*
+  * Function to decrement start
+  */
+ function decrementStart(){
+    if (counter % 15 === 0) {
+        $('.stars').children().first().remove();
+    }
+ }
+
+ /*
+  * Function reset start start
+  */
+ function resetStart(){
+    $('.stars').empty();
+    for(let i = 0; i < 3; i++){
+        $('.stars').append('<li><i class="fa fa-star"></i></li>');
+    }
+ }
+
