@@ -57,10 +57,10 @@ function shuffle(array) {
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
  $('.card').on("click", function(e){
-    // showModal();
     const clickedCard = $(e.currentTarget).attr('class');
     console.log(clickedCard);
     if (clickedCard !== 'card match' && clickedCard !== 'card open show' ) {
+        console.log("tempCard.length", tempCard.length);
         displayCardSymbol(e);
         addToOpenCardList(e);
         checkCard(e);
@@ -70,6 +70,7 @@ function shuffle(array) {
 
  // refersh the card
  $('.restart').on("click", function(){
+    console.log("click restart");
     restart();
  });
 
@@ -84,6 +85,7 @@ function shuffle(array) {
     $('.moves').text("0");
     counter = parseInt($('.moves').text());
     resetStart();
+    resetTime();
  }
 
 /*
@@ -117,7 +119,17 @@ function shuffle(array) {
  /*
   * Function to remove card to open cards
   */
- function removeFromnewCardList(stringCard){
+ function removeFromOpenCardList(stringCard){
+    const index = openCards.indexOf(stringCard);
+    if (index > -1) {
+        openCards.splice(index, 1);
+    }
+ }
+
+ /*
+  * Function to remove card to open cards
+  */
+ function removeFromTempCardList(stringCard){
     const index = tempCard.indexOf(stringCard);
     if (index > -1) {
         tempCard.splice(index, 1);
@@ -129,6 +141,7 @@ function shuffle(array) {
   */
  function checkFinish(){
     if(tempCard.length === 0){
+        clearInterval(timeInterval);
         showModal();
     }
  }
@@ -157,7 +170,7 @@ function shuffle(array) {
     });
 
     modal.css('display', 'block');
-    const message = 'with ' + counter + ' moves and' + stars + 'Start.';
+    const message = 'with ' + counter + ' moves and ' + starts + ' Start.';
     $('.modal-text').text(message);
  }
 
@@ -194,8 +207,10 @@ function shuffle(array) {
         console.log("sama");
         matchCardSymbol(currentCardEvent);
         matchCardSymbol(openCardEvent);
-        removeFromnewCardList(currentCardClass);
-        removeFromnewCardList(openCardClass);
+        removeFromOpenCardList(currentCardClass);
+        removeFromTempCardList(currentCardClass);
+        removeFromOpenCardList(openCardClass);
+        removeFromTempCardList(openCardClass);
         setTimeout(checkFinish(), 500);
     } else {
         console.log("beda");
@@ -235,4 +250,36 @@ function shuffle(array) {
         $('.stars').append('<li><i class="fa fa-star"></i></li>');
     }
  }
+
+ // A $( document ).ready() block.
+$('document').ready(function() {
+    restart();
+});
+
+/*
+ *
+ */
+let minutesLabel = document.getElementById("minutes");
+let secondsLabel = document.getElementById("seconds");
+let totalSeconds = 0;
+let timeInterval = setInterval(setTime, 1000);
+
+function setTime() {
+  ++totalSeconds;
+  secondsLabel.innerHTML = pad(totalSeconds % 60);
+  minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60));
+}
+
+function resetTime() {
+  totalSeconds = 0;
+}
+
+function pad(val) {
+  var valString = val + "";
+  if (valString.length < 2) {
+    return "0" + valString;
+  } else {
+    return valString;
+  }
+}
 
