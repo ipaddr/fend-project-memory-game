@@ -141,7 +141,7 @@ function shuffle(array) {
   */
  function checkFinish(){
     if(tempCard.length === 0){
-        clearInterval(timeInterval);
+        stopTimer();
         showModal();
     }
  }
@@ -262,7 +262,7 @@ $('document').ready(function() {
 let minutesLabel = document.getElementById("minutes");
 let secondsLabel = document.getElementById("seconds");
 let totalSeconds = 0;
-let timeInterval = setInterval(setTime, 1000);
+let timeInterval = null;
 
 function setTime() {
   ++totalSeconds;
@@ -270,8 +270,22 @@ function setTime() {
   minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60));
 }
 
+function startTime(){
+    timeInterval = setInterval(setTime, 1000);
+}
+
 function resetTime() {
+  stopTimer();
+  startTime();
   totalSeconds = 0;
+  secondsLabel.innerHTML = '00';
+  minutesLabel.innerHTML = '00';
+}
+
+function stopTimer(){
+  if (timeInterval) {
+    clearInterval(timeInterval);
+  }
 }
 
 function pad(val) {
